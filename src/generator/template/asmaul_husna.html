@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>99 Asmaul Husna</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        .asmaul-arabic {
+            font-family: 'Amiri', serif;
+            font-size: 1.75rem;
+            line-height: 2rem;
+            color: #1e3a8a;
+        }
+
+        .asmaul-card {
+            transition: all 0.25s ease-in-out;
+            border: 1px solid #e5e7eb;
+        }
+
+        .asmaul-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1);
+            border-color: #3b82f6;
+            background-color: #ffffff;
+        }
+
+        .asmaul-number-badge {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 10px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 800px;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            right: 15px;
+            top: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .modal-iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- quran.js for translation functions -->
+    <script src="scripts/quran.js"></script>
+
+    <script>
+        // Load translations on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get saved language preference
+            var savedLang = localStorage.getItem('quran_translation_lang');
+            var langIndex = savedLang ? parseInt(savedLang) : 0;
+            
+            // Apply translation if not English (0)
+            if (langIndex > 0) {
+                applyAsmaulHusnaTranslation(langIndex);
+            }
+            
+            // Listen for language changes from settings
+            window.addEventListener('languageChanged', function(e) {
+                var langIndex = parseInt(e.detail.langIndex);
+                applyAsmaulHusnaTranslation(langIndex);
+            });
+            
+            // Listen for messages from iframe (settings page)
+            window.addEventListener('message', function(e) {
+                if (e.data && e.data.type === 'languageChanged') {
+                    var langIndex = parseInt(e.data.langIndex);
+                    applyAsmaulHusnaTranslation(langIndex);
+                }
+            });
+        });
+        
+        function applyAsmaulHusnaTranslation(langIndex) {
+            // Call the function from quran.js if available
+            if (typeof loadAsmaulHusnaTranslations === 'function') {
+                loadAsmaulHusnaTranslations(langIndex);
+            }
+        }
+    </script>
+        const asmaulHusna = [
+            { n: 1, latin: "Allah", arabic: "الله", meaning: "Nama Allah yang paling agung" },
+            { n: 2, latin: "Ar-Rahman", arabic: "الرحمن", meaning: "Yang Maha Pengasih" },
+            { n: 3, latin: "Ar-Rahim", arabic: "الرحيم", meaning: "Yang Maha Penyayang" },
+            { n: 4, latin: "Al-Malik", arabic: "الملك", meaning: "Yang Maha Merajai" },
+            { n: 5, latin: "Al-Quddus", arabic: "القدوس", meaning: "Yang Maha Suci" },
+            { n: 6, latin: "As-Salam", arabic: "السلام", meaning: "Yang Maha Memberi Kesejahteraan" },
+            { n: 7, latin: "Al-Mu'min", arabic: "المؤمن", meaning: "Yang Maha Memberi Keamanan" },
+            { n: 8, latin: "Al-Muhaimin", arabic: "المهيمن", meaning: "Yang Maha Pemelihara" },
+            { n: 9, latin: "Al-Aziz", arabic: "العزيز", meaning: "Yang Maha Perkasa" },
+            { n: 10, latin: "Al-Jabbar", arabic: "الجبار", meaning: "Yang Memiliki Mutlak Kegagahan" },
+            { n: 11, latin: "Al-Mutakabbir", arabic: "المتكبر", meaning: "Yang Maha Megah" },
+            { n: 12, latin: "Al-Khaliq", arabic: "الخالق", meaning: "Yang Maha Pencipta" },
+            { n: 13, latin: "Al-Bari'", arabic: "البارئ", meaning: "Yang Maha Melepaskan" },
+            { n: 14, latin: "Al-Mushawwir", arabic: "المصور", meaning: "Yang Maha Membentuk Rupa" },
+            { n: 15, latin: "Al-Ghaffar", arabic: "الغفار", meaning: "Yang Maha Pengampun" },
+            { n: 16, latin: "Al-Qahhar", arabic: "القهار", meaning: "Yang Maha Menundukkan" },
+            { n: 17, latin: "Al-Wahhab", arabic: "الوهاب", meaning: "Yang Maha Pemberi Karunia" },
+            { n: 18, latin: "Ar-Razzaq", arabic: "الرزاق", meaning: "Yang Maha Pemberi Rezeki" },
+            { n: 19, latin: "Al-Fattah", arabic: "الفتاح", meaning: "Yang Maha Pembuka Rahmat" },
+            { n: 20, latin: "Al-Alim", arabic: "العليم", meaning: "Yang Maha Mengetahui" },
+            { n: 21, latin: "Al-Qabidh", arabic: "القابض", meaning: "Yang Maha Menyempitkan" },
+            { n: 22, latin: "Al-Basit", arabic: "الباسط", meaning: "Yang Maha Melapangkan" },
+            { n: 23, latin: "Al-Khafidh", arabic: "الخافض", meaning: "Yang Maha Merendahkan" },
+            { n: 24, latin: "Ar-Rafi'", arabic: "الرافع", meaning: "Yang Maha Meninggikan" },
+            { n: 25, latin: "Al-Mu'izz", arabic: "المعز", meaning: "Yang Maha Memuliakan" },
+            { n: 26, latin: "Al-Muzill", arabic: "المذل", meaning: "Yang Maha Menghinakan" },
+            { n: 27, latin: "Al-Sami'", arabic: "السميع", meaning: "Yang Maha Mendengar" },
+            { n: 28, latin: "Al-Bashir", arabic: "البصير", meaning: "Yang Maha Melihat" },
+            { n: 29, latin: "Al-Hakam", arabic: "الحكم", meaning: "Yang Maha Menetapkan Hukum" },
+            { n: 30, latin: "Al-Adl", arabic: "العدل", meaning: "Yang Maha Adil" },
+            { n: 31, latin: "Al-Lathif", arabic: "اللطيف", meaning: "Yang Maha Lembut" },
+            { n: 32, latin: "Al-Khabir", arabic: "الخبير", meaning: "Yang Maha Mengenal" },
+            { n: 33, latin: "Al-Halim", arabic: "الحليم", meaning: "Yang Maha Penyantun" },
+            { n: 34, latin: "Al-Azhim", arabic: "العظيم", meaning: "Yang Maha Agung" },
+            { n: 35, latin: "Al-Ghafur", arabic: "الغفور", meaning: "Yang Maha Pengampun" },
+            { n: 36, latin: "Ash-Shakur", arabic: "الشكور", meaning: "Yang Maha Menghargai" },
+            { n: 37, latin: "Al-Aliy", arabic: "العلي", meaning: "Yang Maha Tinggi" },
+            { n: 38, latin: "Al-Kabir", arabic: "الكبير", meaning: "Yang Maha Besar" },
+            { n: 39, latin: "Al-Hafizh", arabic: "الحفيظ", meaning: "Yang Maha Memelihara" },
+            { n: 40, latin: "Al-Muqit", arabic: "المقيت", meaning: "Yang Maha Memberi Kecukupan" },
+            { n: 41, latin: "Al-Hasib", arabic: "الحسيب", meaning: "Yang Maha Membuat Perhitungan" },
+            { n: 42, latin: "Al-Jalil", arabic: "الجليل", meaning: "Yang Maha Luhur" },
+            { n: 43, latin: "Al-Karim", arabic: "الكريم", meaning: "Yang Maha Pemurah" },
+            { n: 44, latin: "Ar-Raqib", arabic: "الرقيب", meaning: "Yang Maha Mengawasi" },
+            { n: 45, latin: "Al-Mujib", arabic: "المجيب", meaning: "Yang Maha Mengabulkan" },
+            { n: 46, latin: "Al-Wasi'", arabic: "الواسع", meaning: "Yang Maha Luas" },
+            { n: 47, latin: "Al-Hakim", arabic: "الحكيم", meaning: "Yang Maha Bijaksana" },
+            { n: 48, latin: "Al-Wadud", arabic: "الودود", meaning: "Yang Maha Mengasihi" },
+            { n: 49, latin: "Al-Majid", arabic: "المجيد", meaning: "Yang Maha Mulia" },
+            { n: 50, latin: "Al-Ba'ith", arabic: "الباعث", meaning: "Yang Maha Membangkitkan" },
+            { n: 51, latin: "Ash-Shahid", arabic: "الشهيد", meaning: "Yang Maha Menyaksikan" },
+            { n: 52, latin: "Al-Haqq", arabic: "الحق", meaning: "Yang Maha Benar" },
+            { n: 53, latin: "Al-Wakil", arabic: "الوكيل", meaning: "Yang Maha Memelihara" },
+            { n: 54, latin: "Al-Qawiyy", arabic: "القوي", meaning: "Yang Maha Kuat" },
+            { n: 55, latin: "Al-Matin", arabic: "المتين", meaning: "Yang Maha Kokoh" },
+            { n: 56, latin: "Al-Waliyy", arabic: "الولي", meaning: "Yang Maha Melindungi" },
+            { n: 57, latin: "Al-Hamid", arabic: "الحميد", meaning: "Yang Maha Terpuji" },
+            { n: 58, latin: "Al-Muhsi", arabic: "المحصي", meaning: "Yang Maha Mengkalkulasi" },
+            { n: 59, latin: "Al-Mubdi'", arabic: "المبدئ", meaning: "Yang Maha Memulai" },
+            { n: 60, latin: "Al-Mu'id", arabic: "المعيد", meaning: "Yang Maha Mengembalikan Kehidupan" },
+            { n: 61, latin: "Al-Muhyi", arabic: "المحيي", meaning: "Yang Maha Menghidupkan" },
+            { n: 62, latin: "Al-Mumit", arabic: "المميت", meaning: "Yang Maha Mematikan" },
+            { n: 63, latin: "Al-Hayy", arabic: "الحي", meaning: "Yang Maha Hidup" },
+            { n: 64, latin: "Al-Qayyum", arabic: "القيوم", meaning: "Yang Maha Mandiri" },
+            { n: 65, latin: "Al-Wajid", arabic: "الواجد", meaning: "Yang Maha Penemu" },
+            { n: 66, latin: "Al-Majid", arabic: "الماجد", meaning: "Yang Maha Mulia" },
+            { n: 67, latin: "Al-Wahid", arabic: "الواحد", meaning: "Yang Maha Tunggal" },
+            { n: 68, latin: "Al-Ahad", arabic: "الاحد", meaning: "Yang Maha Esa" },
+            { n: 69, latin: "Ash-Shamad", arabic: "الصمد", meaning: "Yang Maha Dibutuhkan" },
+            { n: 70, latin: "Al-Qadir", arabic: "القادر", meaning: "Yang Maha Menentukan" },
+            { n: 71, latin: "Al-Muqtadir", arabic: "المقتدر", meaning: "Yang Maha Berkuasa" },
+            { n: 72, latin: "Al-Muqaddim", arabic: "المقدم", meaning: "Yang Maha Mendahulukan" },
+            { n: 73, latin: "Al-Mu'akhkhir", arabic: "المؤخر", meaning: "Yang Maha Mengakhirkan" },
+            { n: 74, latin: "Al-Awwal", arabic: "الأول", meaning: "Yang Maha Awal" },
+            { n: 75, latin: "Al-Akhir", arabic: "الأخر", meaning: "Yang Maha Akhir" },
+            { n: 76, latin: "Az-Zhahir", arabic: "الظاهر", meaning: "Yang Maha Nyata" },
+            { n: 77, latin: "Al-Bathin", arabic: "الباطن", meaning: "Yang Maha Gaib" },
+            { n: 78, latin: "Al-Wali", arabic: "الوالي", meaning: "Yang Maha Memerintah" },
+            { n: 79, latin: "Al-Muta'ali", arabic: "المتعالي", meaning: "Yang Maha Tinggi" },
+            { n: 80, latin: "Al-Barr", arabic: "البر", meaning: "Yang Maha Penderma" },
+            { n: 81, latin: "At-Tawwab", arabic: "التواب", meaning: "Yang Maha Penerima Tobat" },
+            { n: 82, latin: "Al-Muntaqim", arabic: "المنتقم", meaning: "Yang Maha Pemberi Balasan" },
+            { n: 83, latin: "Al-Afuww", arabic: "العفو", meaning: "Yang Maha Pemaaf" },
+            { n: 84, latin: "Ar-Ra'uf", arabic: "الرؤوف", meaning: "Yang Maha Pengasuh" },
+            { n: 85, latin: "Malikul-Mulk", arabic: "مالك الملك", meaning: "Yang Maha Penguasa Kerajaan" },
+            { n: 86, latin: "Dzul-Jalali wal-Ikram", arabic: "ذو الجلال و الإكرام", meaning: "Yang Pemilik Kebesaran dan Kemuliaan" },
+            { n: 87, latin: "Al-Muqsit", arabic: "المقسط", meaning: "Yang Maha Pemberi Keadilan" },
+            { n: 88, latin: "Al-Jami'", arabic: "الجامع", meaning: "Yang Maha Mengumpulkan" },
+            { n: 89, latin: "Al-Ghaniyy", arabic: "الغني", meaning: "Yang Maha Kaya" },
+            { n: 90, latin: "Al-Mughni", arabic: "المغني", meaning: "Yang Maha Pemberi Kekayaan" },
+            { n: 91, latin: "Al-Mani'", arabic: "المانع", meaning: "Yang Maha Mencegah" },
+            { n: 92, latin: "Adh-Dharr", arabic: "الضار", meaning: "Yang Maha Penimpa Kemudaratan" },
+            { n: 93, latin: "An-Nafi'", arabic: "النافع", meaning: "Yang Maha Memberi Manfaat" },
+            { n: 94, latin: "An-Nur", arabic: "النور", meaning: "Yang Maha Bercahaya" },
+            { n: 95, latin: "Al-Hadi", arabic: "الهادي", meaning: "Yang Maha Pemberi Petunjuk" },
+            { n: 96, latin: "Al-Badi'", arabic: "البديع", meaning: "Yang Maha Pencipta Tiada Bandingnya" },
+            { n: 97, latin: "Al-Baqi", arabic: "الباقي", meaning: "Yang Maha Kekal" },
+            { n: 98, latin: "Al-Warith", arabic: "الوارث", meaning: "Yang Maha Pewaris" },
+            { n: 99, latin: "As-Sabur", arabic: "الصبور", meaning: "Yang Maha Sabar" }
+        ];
+
+        function renderGrid() {
+            const grid = document.getElementById('asmaul-grid');
+            grid.innerHTML = asmaulHusna.slice(0, 99).map(item => `
+                <div class="asmaul-card bg-white p-6 rounded-2xl flex items-center gap-4 cursor-pointer">
+                    <div class="asmaul-number-badge w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shrink-0 shadow-md text-sm">
+                        ${item.n}
+                    </div>
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-base font-bold text-gray-800">${item.latin}</span>
+                            <span class="asmaul-arabic">${item.arabic}</span>
+                        </div>
+                        <p class="text-xs text-gray-500 italic leading-snug">${item.meaning}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+            event.preventDefault();
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // Jalankan saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', renderGrid);
+    </script>
+</body>
+</html>

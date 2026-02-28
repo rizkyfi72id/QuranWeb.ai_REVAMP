@@ -1,0 +1,2093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenQuran Optimized</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome CDN for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+        }
+        .sura-item {
+            display: flex;
+            align-items: flex-start; /* Align items to the start for better multi-line content */
+            margin-bottom: 1rem; /* Increased spacing between sura items */
+            background-color: #ffffff;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+        .sura-number {
+            background-color: black;
+            color: white;
+            border-radius: 9999px; /* Full rounded */
+            min-width: 2.5rem; /* Increased width for better readability */
+            height: 2.5rem; /* Increased height for better readability */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            margin-right: 1rem; /* Space between number and content */
+            font-size: 1.125rem; /* Text-lg */
+        }
+        .sura-content {
+            flex-grow: 1;
+        }
+        .sura-arabic {
+            font-family: 'Amiri', serif; /* A common Arabic font, you might need to link it */
+            font-size: 1.5rem;
+            text-align: right;
+            width: 100%;
+            display: block;
+            margin-bottom: 0.25rem;
+            color: #333;
+        }
+        .sura-details {
+            font-size: 0.875rem; /* text-sm */
+            color: #6b7280; /* text-gray-500 */
+            margin-top: 0.5rem;
+        }
+        .sura-translation {
+            font-size: 1rem; /* text-base */
+            color: #4b5563; /* text-gray-700 */
+        }
+        /* Responsive adjustments for header */
+        @media (min-width: 768px) {
+            .header-content {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .header-controls {
+                flex-direction: row;
+                space-y: 0;
+                space-x: 4;
+            }
+        }
+        /* Dark mode styles */
+        [data-theme="dark"] {
+            background-color: #1a202c; /* Darker background */
+            color: #cbd5e0; /* Lighter text color */
+        }
+        [data-theme="dark"] .sura-item {
+            background-color: #2d3748; /* Darker card background */
+            color: #e2e8f0; /* Lighter text color for cards */
+        }
+        [data-theme="dark"] .sura-number {
+            background-color: #4a5568; /* Darker background for numbers */
+        }
+        [data-theme="dark"] .sura-arabic {
+            color: #f7fafc; /* Even lighter Arabic text */
+        }
+        [data-theme="dark"] .sura-details {
+            color: #a0aec0; /* Lighter gray for details */
+        }
+        [data-theme="dark"] .sura-translation {
+            color: #edf2f4; /* Very light gray for translation */
+        }
+    </style>
+</head>
+
+<!-- quran.js for translation functions -->
+<script src="scripts/quran.js"></script>
+
+<script>
+    // Load translations on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get saved language preference
+        var savedLang = localStorage.getItem('quran_translation_lang');
+        var langIndex = savedLang ? parseInt(savedLang) : 0;
+        
+        // Load translations for all sura names
+        if (typeof loadAllSuraNameTranslations === 'function') {
+            loadAllSuraNameTranslations(langIndex, 'sura-list');
+        }
+        
+        // Listen for language changes from settings
+        window.addEventListener('languageChanged', function(e) {
+            var langIndex = parseInt(e.detail.langIndex);
+            if (typeof loadAllSuraNameTranslations === 'function') {
+                loadAllSuraNameTranslations(langIndex, 'sura-list');
+            }
+        });
+        
+        // Listen for messages from iframe (settings page)
+        window.addEventListener('message', function(e) {
+            if (e.data && e.data.type === 'languageChanged') {
+                var langIndex = parseInt(e.data.langIndex);
+                if (typeof loadAllSuraNameTranslations === 'function') {
+                    loadAllSuraNameTranslations(langIndex, 'sura-list');
+                }
+            }
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('search');
+        const suraList = document.getElementById('sura-list');
+        const suraItems = suraList.getElementsByClassName('sura-item');
+
+        searchInput.addEventListener('input', function() {
+            const query = searchInput.value.toLowerCase();
+
+            Array.from(suraItems).forEach(function(item) {
+                const suraContent = item.querySelector('.sura-content').textContent.toLowerCase();
+                const suraNumber = item.querySelector('.sura-number').textContent.toLowerCase();
+
+                if (suraContent.includes(query) || suraNumber.includes(query)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('search');
+        const suraList = document.getElementById('sura-list');
+        const suraItems = suraList.getElementsByClassName('sura-item');
+
+        searchInput.addEventListener('input', function() {
+            const query = searchInput.value.toLowerCase();
+
+            Array.from(suraItems).forEach(function(item) {
+                const suraContent = item.querySelector('.sura-content').textContent.toLowerCase();
+                const suraNumber = item.querySelector('.sura-number').textContent.toLowerCase();
+
+                if (suraContent.includes(query) || suraNumber.includes(query)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
+
+    <!-- Main Content Area -->
+    <main class="container mx-auto p-6 flex flex-col items-center flex-grow">
+        <h2 class="text-3xl font-semibold text-gray-800 mt-8 mb-6 pb-2 border-b-2 border-gray-300">Sura List</h2>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6 w-full max-w-4xl" id="sura-list">
+            <!-- Sura List Items with translation IDs -->
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=1'">
+                <div class="sura-number">1</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Faatiha</span>
+                    <span class="sura-arabic">الفاتحة</span>
+                    <p class="sura-translation" id="sura-translation-1">The Opening</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 1
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=2'">
+                <div class="sura-number">2</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Baqara</span>
+                    <span class="sura-arabic">البقرة</span>
+                    <p class="sura-translation" id="sura-translation-2">The Cow</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Medinan</span> | Juz: 1-3
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=3'">
+                <div class="sura-number">3</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Aal-e-Imraan</span>
+                    <span class="sura-arabic">آل عمران</span>
+                    <p class="sura-translation" id="sura-translation-3">Family of Imran</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Medinan</span> | Juz: 3-4
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=4'">
+                <div class="sura-number">4</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">An-Nisaa</span>
+                    <span class="sura-arabic">النساء</span>
+                    <p class="sura-translation" id="sura-translation-4">The Women</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Medinan</span> | Juz: 4-5
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=5'">
+                <div class="sura-number">5</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Maaida</span>
+                    <span class="sura-arabic">المائدة</span>
+                    <p class="sura-translation" id="sura-translation-5">The Table Spread</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Medinan</span> | Juz: 6-7
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=6'">
+                <div class="sura-number">6</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Anaam</span>
+                    <span class="sura-arabic">الأنعام</span>
+                    <p class="sura-translation" id="sura-translation-6">The Cattle</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 7-8
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=7'">
+                <div class="sura-number">7</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Araaf</span>
+                    <span class="sura-arabic">الأعراف</span>
+                    <p class="sura-translation" id="sura-translation-7">The Heights</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 8-9
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=8'">
+                <div class="sura-number">8</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Anfaal</span>
+                    <span class="sura-arabic">الأنفال</span>
+                    <p class="sura-translation" id="sura-translation-8">The Spoils of War</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Medinan</span> | Juz: 9-10
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=9'">
+                <div class="sura-number">9</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">At-Tawba</span>
+                    <span class="sura-arabic">التوبة</span>
+                    <p class="sura-translation" id="sura-translation-9">The Repentance</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Medinan</span> | Juz: 10-11
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=10'">
+                <div class="sura-number">10</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Yunus</span>
+                    <span class="sura-arabic">يونس</span>
+                    <p class="sura-translation" id="sura-translation-10">Jonah</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 11
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=11'">
+                <div class="sura-number">11</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Hud</span>
+                    <span class="sura-arabic">هود</span>
+                    <p class="sura-translation" id="sura-translation-11">Hud</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 11-12
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=12'">
+                <div class="sura-number">12</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Yusuf</span>
+                    <span class="sura-arabic">يوسف</span>
+                    <p class="sura-translation" id="sura-translation-12">Joseph</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 12-13
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=13'">
+                <div class="sura-number">13</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Ar-Ra'd</span>
+                    <span class="sura-arabic">الرعد</span>
+                    <p class="sura-translation" id="sura-translation-13">The Thunder</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Medinan</span> | Juz: 13
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=14'">
+                <div class="sura-number">14</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Ibrahim</span>
+                    <span class="sura-arabic">ابراهيم</span>
+                    <p class="sura-translation" id="sura-translation-14">Abraham</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 13
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=15'">
+                <div class="sura-number">15</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Hijr</span>
+                    <span class="sura-arabic">الحجر</span>
+                    <p class="sura-translation" id="sura-translation-15">The Rocky Tract</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 14
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=16'">
+                <div class="sura-number">16</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">An-Nahl</span>
+                    <span class="sura-arabic">النحل</span>
+                    <p class="sura-translation" id="sura-translation-16">The Bee</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 14
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=17'">
+                <div class="sura-number">17</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Israa</span>
+                    <span class="sura-arabic">الإسراء</span>
+                    <p class="sura-translation" id="sura-translation-17">The Night Journey</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 15
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=18'">
+                <div class="sura-number">18</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Kahf</span>
+                    <span class="sura-arabic">الكهف</span>
+                    <p class="sura-translation" id="sura-translation-18">The Cave</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 15-16
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=19'">
+                <div class="sura-number">19</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Maryam</span>
+                    <span class="sura-arabic">مريم</span>
+                    <p class="sura-translation" id="sura-translation-19">Mary</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 16
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=20'">
+                <div class="sura-number">20</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Taa-Haa</span>
+                    <span class="sura-arabic">طه</span>
+                    <p class="sura-translation" id="sura-translation-20">Taa-Haa</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 16
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=21'">
+                <div class="sura-number">21</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Anbiyaa</span>
+                    <span class="sura-arabic">الأنبياء</span>
+                    <p class="sura-translation" id="sura-translation-21">The Prophets</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 17
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=22'">
+                <div class="sura-number">22</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Hajj</span>
+                    <span class="sura-arabic">الحج</span>
+                    <p class="sura-translation" id="sura-translation-22">The Pilgrimage</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Medinan</span> | Juz: 17
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=23'">
+                <div class="sura-number">23</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Muminoon</span>
+                    <span class="sura-arabic">المؤمنون</span>
+                    <p class="sura-translation" id="sura-translation-23">The Believers</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 18
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=24'">
+                <div class="sura-number">24</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">An-Noor</span>
+                    <span class="sura-arabic">النور</span>
+                    <p class="sura-translation" id="sura-translation-24">The Light</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Medinan</span> | Juz: 18
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=25'">
+                <div class="sura-number">25</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Furqan</span>
+                    <span class="sura-arabic">الفرقان</span>
+                    <p class="sura-translation" id="sura-translation-25">The Criterion</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 18-19
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=26'">
+                <div class="sura-number">26</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Ash-Shu'araa</span>
+                    <span class="sura-arabic">الشعراء</span>
+                    <p class="sura-translation" id="sura-translation-26">The Poets</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 19
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=27'">
+                <div class="sura-number">27</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">An-Naml</span>
+                    <span class="sura-arabic">النمل</span>
+                    <p class="sura-translation" id="sura-translation-27">The Ant</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 19-20
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=28'">
+                <div class="sura-number">28</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qasas</span>
+                    <span class="sura-arabic">القصص</span>
+                    <p class="sura-translation" id="sura-translation-28">The Stories</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 20
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=29'">
+                <div class="sura-number">29</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Ankabut</span>
+                    <span class="sura-arabic">العنكبوت</span>
+                    <p class="sura-translation" id="sura-translation-29">The Spider</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 20-21
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=30'">
+                <div class="sura-number">30</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Ar-Room</span>
+                    <span class="sura-arabic">الروم</span>
+                    <p class="sura-translation" id="sura-translation-30">The Romans</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 21
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=31'">
+                <div class="sura-number">31</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Luqman</span>
+                    <span class="sura-arabic">لقمان</span>
+                    <p class="sura-translation" id="sura-translation-31">Luqman</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 21
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=32'">
+                <div class="sura-number">32</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">As-Sajda</span>
+                    <span class="sura-arabic">السجدة</span>
+                    <p class="sura-translation" id="sura-translation-32">The Prostration</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 21
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=33'">
+                <div class="sura-number">33</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Ahzab</span>
+                    <span class="sura-arabic">الأحزاب</span>
+                    <p class="sura-translation" id="sura-translation-33">The Combined Forces</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Medinan</span> | Juz: 21-22
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=34'">
+                <div class="sura-number">34</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Saba</span>
+                    <span class="sura-arabic">سبأ</span>
+                    <p class="sura-translation" id="sura-translation-34">Sheba</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 22
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=35'">
+                <div class="sura-number">35</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Fatir</span>
+                    <span class="sura-arabic">فاطر</span>
+                    <p class="sura-translation" id="sura-translation-35">Originator</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 22
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=36'">
+                <div class="sura-number">36</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Ya-Seen</span>
+                    <span class="sura-arabic">يس</span>
+                    <p class="sura-translation" id="sura-translation-36">Ya-Seen</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 22-23
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=37'">
+                <div class="sura-number">37</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">As-Saffat</span>
+                    <span class="sura-arabic">الصافات</span>
+                    <p class="sura-translation" id="sura-translation-37">Those who set the Ranks</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 23
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=38'">
+                <div class="sura-number">38</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Saad</span>
+                    <span class="sura-arabic">ص</span>
+                    <p class="sura-translation" id="sura-translation-38">Saad</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 23
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=39'">
+                <div class="sura-number">39</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Az-Zumar</span>
+                    <span class="sura-arabic">الزمر</span>
+                    <p class="sura-translation" id="sura-translation-39">The Troops</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 23-24
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=40'">
+                <div class="sura-number">40</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Ghaafir</span>
+                    <span class="sura-arabic">غافر</span>
+                    <p class="sura-translation" id="sura-translation-40">The Forgiver</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 24
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=41'">
+                <div class="sura-number">41</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Fussilat</span>
+                    <span class="sura-arabic">فصلت</span>
+                    <p class="sura-translation" id="sura-translation-41">Explained in Detail</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 24-25
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=42'">
+                <div class="sura-number">42</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Ash-Shura</span>
+                    <span class="sura-arabic">الشورى</span>
+                    <p class="sura-translation" id="sura-translation-42">The Consultation</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 25
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=43'">
+                <div class="sura-number">43</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Az-Zukhruf</span>
+                    <span class="sura-arabic">الزخرف</span>
+                    <p class="sura-translation" id="sura-translation-43">The Ornaments of Gold</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 25
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=44'">
+                <div class="sura-number">44</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Ad-Dukhaan</span>
+                    <span class="sura-arabic">الدخان</span>
+                    <p class="sura-translation" id="sura-translation-44">The Smoke</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 25
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=45'">
+                <div class="sura-number">45</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Jaathiya</span>
+                    <span class="sura-arabic">الجاثية</span>
+                    <p class="sura-translation" id="sura-translation-45">The Kneeling</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 25
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=46'">
+                <div class="sura-number">46</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Ahqaaf</span>
+                    <span class="sura-arabic">الأحقاف</span>
+                    <p class="sura-translation" id="sura-translation-46">The Wind-Curved Sandhills</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 26
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=47'">
+                <div class="sura-number">47</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Muhammad</span>
+                    <span class="sura-arabic">محمد</span>
+                    <p class="sura-translation" id="sura-translation-47">Muhammad</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Medinan</span> | Juz: 26
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=48'">
+                <div class="sura-number">48</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Fath</span>
+                    <span class="sura-arabic">الفتح</span>
+                    <p class="sura-translation" id="sura-translation-48">The Victory</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Medinan</span> | Juz: 26
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=49'">
+                <div class="sura-number">49</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Hujuraat</span>
+                    <span class="sura-arabic">الحجرات</span>
+                    <p class="sura-translation" id="sura-translation-49">The Dwellings</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Medinan</span> | Juz: 26
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=50'">
+                <div class="sura-number">50</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Qaaf</span>
+                    <span class="sura-arabic">ق</span>
+                    <p class="sura-translation" id="sura-translation-50">Qaaf</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 26
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=51'">
+                <div class="sura-number">51</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Adh-Dhaariyaat</span>
+                    <span class="sura-arabic">الذاريات</span>
+                    <p class="sura-translation" id="sura-translation-51">The Winnowing Winds</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 26-27
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=52'">
+                <div class="sura-number">52</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">At-Tur</span>
+                    <span class="sura-arabic">الطور</span>
+                    <p class="sura-translation" id="sura-translation-52">The Mount</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 27
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=53'">
+                <div class="sura-number">53</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">An-Najm</span>
+                    <span class="sura-arabic">النجم</span>
+                    <p class="sura-translation" id="sura-translation-53">The Star</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 27
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=54'">
+                <div class="sura-number">54</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qamar</span>
+                    <span class="sura-arabic">القمر</span>
+                    <p class="sura-translation" id="sura-translation-54">The Moon</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 27
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=55'">
+                <div class="sura-number">55</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Ar-Rahman</span>
+                    <span class="sura-arabic">الرحمن</span>
+                    <p class="sura-translation" id="sura-translation-55">The Most Gracious</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Medinan</span> | Juz: 27
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=56'">
+                <div class="sura-number">56</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Waqi'a</span>
+                    <span class="sura-arabic">الواقعة</span>
+                    <p class="sura-translation" id="sura-translation-56">The Inevitable</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 27
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=57'">
+                <div class="sura-number">57</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Hadid</span>
+                    <span class="sura-arabic">الحديد</span>
+                    <p class="sura-translation" id="sura-translation-57">The Iron</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Medinan</span> | Juz: 27
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=58'">
+                <div class="sura-number">58</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Mujadila</span>
+                    <span class="sura-arabic">المجادلة</span>
+                    <p class="sura-translation" id="sura-translation-58">The Pleading Woman</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Medinan</span> | Juz: 28
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=59'">
+                <div class="sura-number">59</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Hashr</span>
+                    <span class="sura-arabic">الحشر</span>
+                    <p class="sura-translation" id="sura-translation-59">The Exile</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Medinan</span> | Juz: 28
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=60'">
+                <div class="sura-number">60</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Mumtahina</span>
+                    <span class="sura-arabic">الممتحنة</span>
+                    <p class="sura-translation" id="sura-translation-60">The Examined One</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Medinan</span> | Juz: 28
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=61'">
+                <div class="sura-number">61</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">As-Saff</span>
+                    <span class="sura-arabic">الصف</span>
+                    <p class="sura-translation" id="sura-translation-61">The Ranks</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Medinan</span> | Juz: 28
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=62'">
+                <div class="sura-number">62</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Jumu'a</span>
+                    <span class="sura-arabic">الجمعة</span>
+                    <p class="sura-translation" id="sura-translation-62">The Congregation</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Medinan</span> | Juz: 28
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=63'">
+                <div class="sura-number">63</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Munafiqun</span>
+                    <span class="sura-arabic">المنافقون</span>
+                    <p class="sura-translation" id="sura-translation-63">The Hypocrites</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Medinan</span> | Juz: 28
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=64'">
+                <div class="sura-number">64</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">At-Taghabun</span>
+                    <span class="sura-arabic">التغابن</span>
+                    <p class="sura-translation" id="sura-translation-64">The Mutual Disappointment</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Medinan</span> | Juz: 28
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=65'">
+                <div class="sura-number">65</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">At-Talaq</span>
+                    <span class="sura-arabic">الطلاق</span>
+                    <p class="sura-translation" id="sura-translation-65">The Divorce</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Medinan</span> | Juz: 28
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=66'">
+                <div class="sura-number">66</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">At-Tahrim</span>
+                    <span class="sura-arabic">التحريم</span>
+                    <p class="sura-translation" id="sura-translation-66">The Prohibition</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Medinan</span> | Juz: 28
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=67'">
+                <div class="sura-number">67</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Mulk</span>
+                    <span class="sura-arabic">الملك</span>
+                    <p class="sura-translation" id="sura-translation-67">The Sovereignty</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=68'">
+                <div class="sura-number">68</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qalam</span>
+                    <span class="sura-arabic">القلم</span>
+                    <p class="sura-translation" id="sura-translation-68">The Pen</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=69'">
+                <div class="sura-number">69</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Haqqa</span>
+                    <span class="sura-arabic">الحاقة</span>
+                    <p class="sura-translation" id="sura-translation-69">The Reality</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=70'">
+                <div class="sura-number">70</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Ma'arij</span>
+                    <span class="sura-arabic">المعارج</span>
+                    <p class="sura-translation" id="sura-translation-70">The Ascending Stairways</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=71'">
+                <div class="sura-number">71</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Nuh</span>
+                    <span class="sura-arabic">نوح</span>
+                    <p class="sura-translation" id="sura-translation-71">Noah</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=72'">
+                <div class="sura-number">72</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Jinn</span>
+                    <span class="sura-arabic">الجن</span>
+                    <p class="sura-translation" id="sura-translation-72">The Jinn</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=73'">
+                <div class="sura-number">73</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Muzzammil</span>
+                    <span class="sura-arabic">المزمل</span>
+                    <p class="sura-translation" id="sura-translation-73">The Enshrouded One</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=74'">
+                <div class="sura-number">74</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Muddaththir</span>
+                    <span class="sura-arabic">المدثر</span>
+                    <p class="sura-translation" id="sura-translation-74">The Cloaked One</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=75'">
+                <div class="sura-number">75</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-75">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=76'">
+                <div class="sura-number">76</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Kafirun</span>
+                    <span class="sura-arabic">الكافرين</span>
+                    <p class="sura-translation" id="sura-translation-76">The Disbelievers</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=77'">
+                <div class="sura-number">77</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Nas</span>
+                    <span class="sura-arabic">الناس</span>
+                    <p class="sura-translation" id="sura-translation-77">The People</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=78'">
+                <div class="sura-number">78</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Masood</span>
+                    <span class="sura-arabic">المسود</span>
+                    <p class="sura-translation" id="sura-translation-78">The Masood</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=79'">
+                <div class="sura-number">79</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-79">The Qasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=80'">
+                <div class="sura-number">80</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-80">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=81'">
+                <div class="sura-number">81</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-81">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=82'">
+                <div class="sura-number">82</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-82">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=83'">
+                <div class="sura-number">83</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-83">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=84'">
+                <div class="sura-number">84</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-84">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=85'">
+                <div class="sura-number">85</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-85">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=86'">
+                <div class="sura-number">86</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-86">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=87'">
+                <div class="sura-number">87</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-87">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=88'">
+                <div class="sura-number">88</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-88">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=89'">
+                <div class="sura-number">89</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-89">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=90'">
+                <div class="sura-number">90</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-90">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=91'">
+                <div class="sura-number">91</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-91">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=92'">
+                <div class="sura-number">92</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-92">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=93'">
+                <div class="sura-number">93</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-93">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=94'">
+                <div class="sura-number">94</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-94">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=95'">
+                <div class="sura-number">95</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-95">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=96'">
+                <div class="sura-number">96</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-96">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=97'">
+                <div class="sura-number">97</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-97">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=98'">
+                <div class="sura-number">98</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-98">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=99'">
+                <div class="sura-number">99</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-99">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=100'">
+                <div class="sura-number">100</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-100">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=101'">
+                <div class="sura-number">101</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-101">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=102'">
+                <div class="sura-number">102</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-102">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=103'">
+                <div class="sura-number">103</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-103">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=104'">
+                <div class="sura-number">104</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-104">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=105'">
+                <div class="sura-number">105</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-105">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=106'">
+                <div class="sura-number">106</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-106">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=107'">
+                <div class="sura-number">107</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-107">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=108'">
+                <div class="sura-number">108</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-108">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=109'">
+                <div class="sura-number">109</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-109">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=110'">
+                <div class="sura-number">110</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-110">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=111'">
+                <div class="sura-number">111</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-111">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=112'">
+                <div class="sura-number">112</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-112">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=113'">
+                <div class="sura-number">113</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-113">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=114'">
+                <div class="sura-number">114</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-114">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=115'">
+                <div class="sura-number">115</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-115">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=116'">
+                <div class="sura-number">116</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-116">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=117'">
+                <div class="sura-number">117</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-117">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=118'">
+                <div class="sura-number">118</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-118">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=119'">
+                <div class="sura-number">119</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-119">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=120'">
+                <div class="sura-number">120</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-120">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=121'">
+                <div class="sura-number">121</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-121">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=122'">
+                <div class="sura-number">122</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-122">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=123'">
+                <div class="sura-number">123</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-123">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=124'">
+                <div class="sura-number">124</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-124">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=125'">
+                <div class="sura-number">125</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-125">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=126'">
+                <div class="sura-number">126</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-126">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=127'">
+                <div class="sura-number">127</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-127">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=128'">
+                <div class="sura-number">128</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-128">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=129'">
+                <div class="sura-number">129</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-129">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=130'">
+                <div class="sura-number">130</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-130">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=131'">
+                <div class="sura-number">131</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-131">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=132'">
+                <div class="sura-number">132</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-132">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=133'">
+                <div class="sura-number">133</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-133">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=134'">
+                <div class="sura-number">134</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-134">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=135'">
+                <div class="sura-number">135</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-135">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=136'">
+                <div class="sura-number">136</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-136">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=137'">
+                <div class="sura-number">137</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-137">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=138'">
+                <div class="sura-number">138</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-138">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=139'">
+                <div class="sura-number">139</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-139">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=140'">
+                <div class="sura-number">140</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-140">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=141'">
+                <div class="sura-number">141</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-141">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=142'">
+                <div class="sura-number">142</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-142">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=143'">
+                <div class="sura-number">143</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-143">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=144'">
+                <div class="sura-number">144</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-144">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=145'">
+                <div class="sura-number">145</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-145">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=146'">
+                <div class="sura-number">146</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-146">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=147'">
+                <div class="sura-number">147</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-147">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=148'">
+                <div class="sura-number">148</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-148">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=149'">
+                <div class="sura-number">149</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-149">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=150'">
+                <div class="sura-number">150</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-150">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=151'">
+                <div class="sura-number">151</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-151">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=152'">
+                <div class="sura-number">152</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-152">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=153'">
+                <div class="sura-number">153</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-153">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=154'">
+                <div class="sura-number">154</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-154">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=155'">
+                <div class="sura-number">155</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-155">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=156'">
+                <div class="sura-number">156</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-156">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=157'">
+                <div class="sura-number">157</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-157">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=158'">
+                <div class="sura-number">158</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-158">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=159'">
+                <div class="sura-number">159</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-159">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=160'">
+                <div class="sura-number">160</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-160">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=161'">
+                <div class="sura-number">161</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-161">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=162'">
+                <div class="sura-number">162</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-162">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=163'">
+                <div class="sura-number">163</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-163">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=164'">
+                <div class="sura-number">164</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-164">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=165'">
+                <div class="sura-number">165</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-165">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=166'">
+                <div class="sura-number">166</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-166">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=167'">
+                <div class="sura-number">167</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-167">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=168'">
+                <div class="sura-number">168</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-168">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=169'">
+                <div class="sura-number">169</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-169">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=170'">
+                <div class="sura-number">170</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-170">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=171'">
+                <div class="sura-number">171</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-171">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=172'">
+                <div class="sura-number">172</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-172">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=173'">
+                <div class="sura-number">173</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-173">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> | Juz: 29
+                    </div>
+                </div>
+            </div>
+            <div class="sura-item" onclick="window.location.href='sura.html?sura=174'">
+                <div class="sura-number">174</div>
+                <div class="sura-content">
+                    <span class="text-lg font-medium text-gray-700">Al-Qaasid</span>
+                    <span class="sura-arabic">القاسيد</span>
+                    <p class="sura-translation" id="sura-translation-174">The Qaasid</p>
+                    <div class="sura-details">
+                        <span class="font-semibold">Meccan</span> |

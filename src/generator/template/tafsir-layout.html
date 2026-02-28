@@ -1,0 +1,91 @@
+{{HEADER}}
+<div class="header">
+    <h2 class="page-name">{{PAGE_NAME}}</h2>
+	<h1 class="surah-name"><span class="surah-number-name">{{SURAH_NUMBER}}</span><a  class="surah-header-link" title="Kembali ke Surah {{SURAH_NAME_LATIN}}" href="{{SURAH_URL}}">{{SURAH_NAME_LATIN}} - {{SURAH_NAME_ARABIC}}</a></h1>
+	<h2 class="surah-count">Ayat ke-{{AYAH_NUMBER}}</h2>
+</div>
+
+{{MENU}}
+
+<!-- Begin each ayah -->
+<div class="ayah-wrapper">
+
+    <div class="ayah" title="{{SURAH_NAME_LATIN}},{{SURAH_NUMBER}},{{AYAH_NUMBER}}">
+        <div class="ayah-prev-next-wrapper">
+            <a title="Sebelumnya Surah {{PREV_SURAH_NAME}} ayat {{PREV_AYAH_NUMBER}}" class="ayah-prev" href="{{PREV_URL}}">&larr;</a>
+            <a title="Berikutnya Surah {{NEXT_SURAH_NAME}} ayat {{NEXT_AYAH_NUMBER}}" class="ayah-next" href="{{NEXT_URL}}">&rarr;</a>
+        </div>
+        <div class="goto-ayah-wrapper">
+            <span class="label-goto-ayah">Ke ayat</span>
+            <select class="goto-ayah goto-ayah-tafsir" id="goto-ayah">
+                {{EACH_GOTO_AYAH}}
+            </select>
+        </div>
+        <div class="ayah-text" dir="rtl"><p>{{AYAH_TEXT}}<span class="ayah-number" dir="ltr">{{AYAH_NUMBER}}</span></p></div>
+        <div class="ayah-toolbar">
+            <a class="icon-ayah-toolbar icon-back-to-top" title="Kembali ke atas" href="#"><span class="icon-content">&#x21e7;</span></a>
+            <a class="icon-ayah-toolbar icon-mark-ayah link-mark-ayah" title="Tandai terakhir dibaca" href="#"><span class="icon-content">&#x2713;</span></a>
+            <a class="icon-ayah-toolbar icon-play-audio murottal-audio-player" title="Audio Ayat"
+               data-surah-number="{{SURAH_NUMBER}}"
+               data-ayah-number="{{AYAH_NUMBER}}"
+               data-from-tafsir-page="1"><span class="icon-content">&#x25b6;</span></a>
+        </div>
+        <div class="ayah-translation"><p>{{AYAH_TRANSLATION}}</p></div>
+        <div class="ayah-tafsir-wrapper">
+            {{EACH_TAFSIR}}
+        </div>
+    </div>
+
+</div>
+
+{{FOOTER}}
+
+<div class="floating-translator">
+    <label for="tafsir-language">Select Tafsir Language:</label>
+    <select id="tafsir-language" class="tafsir-language-dropdown">
+        {{EACH_TAFSIR_LANGUAGE}}
+    </select>
+</div>
+
+<script>
+    document.getElementById('tafsir-language').addEventListener('change', function () {
+        const selectedLanguage = this.value;
+        const tafsirElements = document.querySelectorAll('.ayah-tafsir-wrapper');
+
+        tafsirElements.forEach(wrapper => {
+            wrapper.querySelectorAll('.tafsir-content').forEach(content => {
+                content.style.display = content.dataset.language === selectedLanguage ? 'block' : 'none';
+            });
+        });
+    });
+</script>
+
+<div class="floating-translator">
+    <h4>Quick Translate</h4>
+    <textarea id="sourceText" placeholder="Enter text..." rows="2" style="width: 100%;"></textarea>
+    
+    <select id="targetLang">
+        <option value="bn"></option>
+        <option value="de">German</option>
+        <option value="en">English</option>
+        <option value="es">Spanish</option>
+        <option value="fr">French</option>
+        <option value="fa">Persian</option>
+        <option value="hi">Hindi</option>
+        <option value="id">Indonesian</option>
+        <option value="it">Italian</option>
+        <option value="ja">Japanese</option>
+        <option value="ko">Korean</option>
+        <option value="ms">Malay</option>
+        <option value="pt">Portuguese</option>
+        <option value="ru">Russian</option>
+        <option value="tr">Turkish</option>
+        <option value="ur">Urdu</option>
+        <option value="zhs">Chinese (Simplified)
+        <option value="zht">Chinese (Traditional)</option>
+        </option>
+    </select>
+    
+    <button onclick="translateText()">Translate</button>
+    <p id="translatedResult" style="margin-top: 10px; font-weight: bold;"></p>
+</div>

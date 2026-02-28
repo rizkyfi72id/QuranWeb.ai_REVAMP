@@ -1,0 +1,144 @@
+{{HEADER}}
+<div class="header">
+    <h2 class="page-name">{{PAGE_NAME}}</h2>
+    <h1 class="surah-name"><span class="surah-number-name">{{SURAH_NUMBER}}</span>{{SURAH_NAME_LATIN}} - {{SURAH_NAME_ARABIC}}</h1>
+    <h2 class="surah-count">{{TOTAL_AYAH}} Ayat</h2>
+</div>
+
+{{MENU}}
+
+<!-- Begin each ayah -->
+<div class="ayah-wrapper">
+
+    <div class="ayah-prev-next-wrapper">
+        <a title="Sebelumnya Surah {{PREV_SURAH_NAME}}" class="ayah-prev" href="{{PREV_URL}}">&larr;</a>
+        <a title="Berikutnya Surah {{NEXT_SURAH_NAME}}" class="ayah-next" href="{{NEXT_URL}}">&rarr;</a>
+    </div>
+    <div class="goto-ayah-wrapper">
+        <div class="label-goto-ayah">Ke ayat</div>
+        <select class="goto-ayah" id="goto-ayah">
+            {{EACH_GOTO_AYAH}}
+        </select>
+    </div>
+
+    {{EACH_AYAH}}
+
+    <div class="ayah-prev-next-wrapper bottom">
+        <a title="Sebelumnya Surah {{PREV_SURAH_NAME}}" class="ayah-prev bottom" href="{{PREV_URL}}">&larr;</a>
+        <a title="Berikutnya Surah {{NEXT_SURAH_NAME}}" class="ayah-next bottom" href="{{NEXT_URL}}">&rarr;</a>
+    </div>
+</div>
+
+<!-- Floating AI Correction Panel -->
+<div class="pill-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
+    <button id="micBtn" class="circle-btn">
+        <i data-lucide="mic" size="32"></i>
+    </button>
+    <button id="speakerBtn" class="circle-btn">
+        <i data-lucide="volume-2" size="32"></i>
+    </button>
+</div>
+
+<div id="correctionPanel" class="panel" style="position: fixed; bottom: 100px; right: 20px; z-index: 1000;">
+    <div class="flex justify-between items-center mb-4">
+        <div class="flex items-center text-red-600 font-bold text-sm">
+            <span class="w-2 h-2 bg-red-600 rounded-full mr-2 animate-ping"></span>
+            RECORDING...
+        </div>
+        <div id="timer" class="font-mono text-lg">00:00</div>
+    </div>
+
+    <label class="text-[10px] font-bold text-gray-400 uppercase">Mushaf (Target)</label>
+    <div id="targetText" class="mushaf-box font-serif">
+        بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+    </div>
+
+    <label class="text-[10px] font-bold text-gray-400 uppercase">Hasil Bacaan Kamu</label>
+    <div id="userResult" class="correction-box mt-1 italic text-gray-500 min-h-[50px]">
+        Silahkan mulai membaca...
+    </div>
+
+    <div id="feedbackText" class="mt-3 text-sm font-medium hidden">
+        <!-- Feedback akan muncul di sini -->
+    </div>
+</div>
+
+<script>
+    lucide.createIcons();
+
+    const micBtn = document.getElementById('micBtn');
+    const speakerBtn = document.getElementById('speakerBtn');
+    const correctionPanel = document.getElementById('correctionPanel');
+    const timerDisplay = document.getElementById('timer');
+    const userResult = document.getElementById('userResult');
+    const feedbackText = document.getElementById('feedbackText');
+
+    let isRecording = false;
+    let timerInt;
+    let seconds = 0;
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition;
+
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.lang = 'ar-SA';
+        recognition.interimResults = true;
+        recognition.continuous = true;
+
+        recognition.onresult = (event) => {
+            const transcript = Array.from(event.results)
+                .map(result => result[0].transcript)
+                .join('');
+
+            userResult.innerHTML = transcript;
+            compareTexts(transcript);
+        };
+    }
+
+    function compareTexts(transcript) {
+        const target = document.getElementById('targetText').innerText;
+        const cleanUser = transcript.replace(/[^
+\u0621-\u064A\s]/g, "");
+
+        feedbackText.classList.remove('hidden');
+        if (target.includes(cleanUser) || cleanUser.includes(target)) {
+            feedbackText.innerHTML = "✅ Bacaan Benar!";
+            feedbackText.className = "mt-3 text-sm font-medium text-green-600";
+        } else {
+            feedbackText.innerHTML = "❌ Ada kesalahan, coba perhatikan makhrajnya.";
+            feedbackText.className = "mt-3 text-sm font-medium text-red-600";
+        }
+    }
+
+    micBtn.addEventListener('click', () => {
+        isRecording = !isRecording;
+
+        if (isRecording) {
+            micBtn.classList.add('recording');
+            correctionPanel.classList.add('active');
+            startTimer();
+            if (recognition) recognition.start();
+            userResult.innerHTML = "Mendengarkan...";
+        } else {
+            stopRecording();
+        }
+    });
+
+    function startTimer() {
+        seconds = 0;
+        timerInt = setInterval(() => {
+            seconds++;
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            timerDisplay.textContent = `${m}:${s}`;
+        }, 1000);
+    }
+
+    function stopRecording() {
+        isRecording = false;
+        micBtn.classList.remove('recording');
+        clearInterval(timerInt);
+        if (recognition) recognition.stop();
+    }
+</script>

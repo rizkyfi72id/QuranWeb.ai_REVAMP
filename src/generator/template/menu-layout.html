@@ -1,0 +1,48 @@
+<div class="menu">
+    <a title="Klik untuk membuka menu" href="#sidepage">
+        <span class="linemenu"></span>
+        <span class="linemenu"></span>
+        <span class="linemenu"></span>
+    </a>
+</div>
+
+<div id="sidepage" class="sidepage">
+    <div class="sidepage-close"><a title="Tutup menu" href="#">X</a></div>
+    <div class="sidepage-item settings">
+        <span><input id="translation" class="checkbox" type="checkbox" checked=""> <label title="Aktifkan atau non-aktifkan terjemahan ayat" for="translation">Terjemahan</label></span>
+        <span><input id="nightmode" class="checkbox" type="checkbox"> <label title="Aktifkan atau non-aktifkan tampilan mode malam" for="nightmode">Mode Malam</label></span>
+    </div>
+    <div class="sidepage-item">
+        <a title="Buka halaman daftar surah" href="{{BASE_URL}}/" class="sidepage-item-link"><span>Daftar Surah</span></a>
+    </div>
+    <div class="sidepage-item">
+        <a title="Buka Quran Correction AI (latihan melafalkan / mendengarkan)" href="{{BASE_URL}}/correction-ai.html" class="sidepage-item-link"><span>Quran Correction AI</span></a>
+    </div>
+    <div class="sidepage-item">
+        <a title="Buka ayat yang terakhir dibaca" href="#" class="sidepage-item-link" id="last-read-link">
+            <span>Terakhir Dibaca</span>
+            <span id="sidepage-item-last-marked" class="sidepage-item-last-marked">Belum Ada. Click pada simbol &#x2713; untuk menandai.</span>
+        </a>
+    </div>
+    <div class="sidepage-item settings">
+        <a title="Audio murottal tiap ayat" class="sidepage-item-link">Audio Murottal</a>
+        <span class="sidepage-subitem"><input id="murottal-mode-noloop" name="murottal-mode" class="checkbox" type="radio" checked value="noloop"> <label title="Berhenti ketika ayat selesai" for="murottal-mode-noloop">Tidak diulang</label></span>
+        <span class="sidepage-subitem"><input id="murottal-mode-loop-ayah" name="murottal-mode" class="checkbox" type="radio" value="ayah"> <label title="Ulang murottal pada ayat" for="murottal-mode-loop-ayah">Ulangi ayat</label></span>
+        <span class="sidepage-subitem"><input id="murottal-mode-loop-ayah-selection" name="murottal-mode" class="checkbox" type="radio" value="ayah-selection"> <label title="Ulang murottal pada ayat" for="murottal-mode-loop-ayah-selection">Ulangi ayat pilihan</label></span>
+        <span class="sidepage-subitem"><input id="ayah-selection-input" type="text" class="sidepage-textbox-for-radio" placeholder="Contoh: 5,6,11-15,20,22"></span>
+        <span class="sidepage-subitem"><input id="murottal-mode-loop-surah" name="murottal-mode" class="checkbox" type="radio" value="surah"> <label title="Ulang murottal pada surah" for="murottal-mode-loop-surah">Ulangi surah</label></span>
+        <span class="sidepage-subitem">
+            <select id="murottal-reciter" name="murottal-reciter" class="murottal-reciter" title="Pilih nama qori">
+                <option value="Abdurrahmaan_As-Sudais_192kbps">Sheikh Abdurrahman As-Sudais</option>
+                <option value="Husary_128kbps">Sheikh Mahmoud Khalil Al-Hussary</option>
+                <option value="Alafasy_128kbps">Sheikh Mishary Rashid Alafasy</option>
+            </select>
+        </span>
+    </div>
+    <div class="sidepage-item">
+        <a title="Buka halaman tentang QuranWeb" href="{{BASE_URL}}/tentang/" class="sidepage-item-link"><span>Tentang {{APP_NAME}}</span></a>
+    </div>
+    <div class="sidepage-item">
+        <a title="Buka halaman GitHub dari QuranWeb" href="{{GITHUB_PROJECT_URL}}" class="sidepage-item-link"><span>GitHub</span></a>
+    </div>
+</div>
